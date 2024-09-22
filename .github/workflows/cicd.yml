@@ -40,11 +40,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-        - name: Push the image to Amazon ECR
-        - name: Push the image to Amazon ECR
-          # AWS Account Idが漏洩しないように変数として渡す 
       - name: Push the image to Amazon ECR
-          # AWS Account Idが漏洩しないように変数として渡す 
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
@@ -80,7 +76,6 @@ jobs:
           path: artifacts
 
       - name: Define the image URI
-        # $GITHUB_ENVは、GitHub Actionsの環境変数を設定するための特殊な変数
         run: |
           echo "API_IMAGE_URI=$(cat artifacts/api-image-uri.txt)" >> $GITHUB_ENV
 
@@ -91,7 +86,7 @@ jobs:
           task-definition: ${{ env.ECS_TASK_DEFINITION_API }}
           container-name: api
           image: ${{ env.API_IMAGE_URI }}
-      
+
       - name: Deploy ECS task
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
