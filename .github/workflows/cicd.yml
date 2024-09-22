@@ -3,6 +3,7 @@ on:
   push: 
     paths:
       - 'cicd-section/api/**'
+      - '.github/workflows/**'
 
 env: 
   AWS_REGION: ap-northeast-1
