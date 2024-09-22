@@ -49,4 +49,4 @@ jobs:
           # Tagが重複しないように、SHAをタグとしてつける
           run: |
             docker tag temp_api_image:latest $ECR_REGISTRY/$ECS_REPOSITORY:${{ github.sha }}
-            docker push $ECR_REGISTRY/$ECS_REPOSITORY:latest
+            docker push $ECR_REGISTRY/$ECS_REPOSITORY:${{ github.sha }}
