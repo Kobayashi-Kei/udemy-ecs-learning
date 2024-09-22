@@ -85,7 +85,7 @@ jobs:
       - name: Define the image URI
         # $GITHUB_ENVは、GitHub Actionsの環境変数を設定するための特殊な変数
         run: |
-          echo "API_IMAGE_URI=$(cat artifacts/api-image-uri/api-image-uri.txt)" >> $GITHUB_ENV
+          echo "API_IMAGE_URI=$(cat artifacts/api-image-uri.txt)" >> $GITHUB_ENV
 
       - name: Fill in the new image URI in the ECS task definition
         id: render-task-def
