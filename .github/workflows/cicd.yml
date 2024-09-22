@@ -1,14 +1,51 @@
-name: Hello Github Actions
-on: push
+name: Web API CI/CD
+on: 
+  push: 
+    paths:
+      - 'cicd-section/api/**'
+
+env: 
+  AWS_REGION: ap-northeast-1
+  ECS_CLUSTER: my-app-cluster
+  ECS_SERVICE: my-app-api-service
+  ECS_REPOSITORY: ny-app-api
+  ECS_TASK_DEFINITION: cicd-section/.aws/task-def-api.json
+
+# Configure AWS credentialsで利用するため
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
-  hello-job:
+  # Test/Build
+  test-and-build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cicd-section/api
     steps:
-        - run: echo "Hello"
-        - run: echo "Github Actions!!"
-  goodbye-job:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Goodbye"
-      - run: echo "Github Actions!!"
+        # Checkout code (Marketplace Action)
+        - uses: actions/checkout@v4
+        
+        - name : Run Tests and Build an Image
+          run: docker image build -t temp_api_image:latest .
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            # Open Id Connect を利用した認証
+            role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+            aws-region: ${{ env.AWS_REGION }}
+
+        - name: Login to Amazon ECR
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v2
+
+        - name: Push the image to Amazon ECR
+          # AWS Account Idが漏洩しないように変数として渡す 
+          env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          # Tagが重複しないように、SHAをタグとしてつける
+          run: |
+            docker tag temp_api_image:latest $ECR_REGISTRY/$ECS_REPOSITORY:${{ github.sha }}
+            docker push $ECR_REGISTRY/$ECS_REPOSITORY:latest
